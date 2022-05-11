@@ -2,7 +2,7 @@ import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { useGoogleAPI } from '../hooks/useGoogleAPI'
 
-const CLIENT_ID = import.meta.env.CLIENT_ID
+const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
 
 const DISCOVERY_DOCS = [
   'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest',
