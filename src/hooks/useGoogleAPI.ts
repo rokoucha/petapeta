@@ -1,12 +1,10 @@
 export type useGoogleAPIParams = {
-  accessToken?: string | undefined
   clientId: string
   discoveryDocs: string[]
   scopes: string[]
 }
 
 export function useGoogleAPI({
-  accessToken,
   clientId,
   discoveryDocs,
   scopes,
@@ -47,22 +45,32 @@ export function useGoogleAPI({
 
     await gapi.client.init({})
     await Promise.all(discoveryDocs.map((d) => gapi.client.load(d)))
+  }
 
-    if (accessToken) {
-      let res: gapi.client.Response<any> | undefined = undefined
-      try {
-        res = await gapi.client.request({
-          path: 'https://www.googleapis.com/oauth2/v3/tokeninfo',
-          method: 'GET',
-        })
-      } catch (e) {
-        console.error('Failed to fetch tokeninfo', e)
-      }
+  const setToken = async (accessToken: string): Promise<boolean> => {
+    if (!isReady) await setup()
 
-      if (res?.status === 200) {
-        gapi.client.setToken({ access_token: accessToken })
-      }
+    let res: gapi.client.Response<any> | undefined = undefined
+    try {
+      res = await gapi.client.request({
+        path: `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${accessToken}`,
+        method: 'GET',
+      })
+    } catch (e) {
+      console.error('Failed to fetch tokeninfo', e)
+
+      return false
     }
+
+    if (res.status !== 200) {
+      console.error('Status is not 200: ', res)
+
+      return false
+    }
+
+    gapi.client.setToken({ access_token: accessToken })
+
+    return true
   }
 
   const getToken = () =>
@@ -98,5 +106,5 @@ export function useGoogleAPI({
     }
   }
 
-  return { setup, getToken, revokeToken } as const
+  return { setup, setToken, getToken, revokeToken } as const
 }

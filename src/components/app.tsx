@@ -29,27 +29,17 @@ function useEffectOnce(effect: React.EffectCallback) {
 export const App: React.FC = () => {
   const [isSignedIn, setIsSignedIn] = useState(false)
 
-  const { setup, getToken, revokeToken } = useGoogleAPI({
+  const { setup, setToken, getToken, revokeToken } = useGoogleAPI({
     clientId: CLIENT_ID,
     discoveryDocs: DISCOVERY_DOCS,
     scopes: SCOPES,
   })
 
   useEffectOnce(() => {
-    setup().then(() => {
+    setup().then(async () => {
       const accessToken = localStorage.getItem('access_token')
-      if (accessToken) {
-        gapi.client.setToken({ access_token: accessToken })
-
-        setIsSignedIn(true)
-
-        gapi.client
-          .request({
-            path: 'https://www.googleapis.com/oauth2/v3/tokeninfo',
-            method: 'GET',
-          })
-          .then((r) => console.log(r))
-      }
+      if (!accessToken) return
+      setIsSignedIn(await setToken(accessToken))
     })
   })
 
