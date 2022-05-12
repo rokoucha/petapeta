@@ -26,11 +26,9 @@ export const Landing: React.FC = () => {
       <Typography component="h1" variant="h5">
         Search your Google Drive
       </Typography>
-      <SignInWithGoogle
-        disabled={isLoading}
-        onClick={onSignInClick}
-        sx={{ mt: 2 }}
-      />
+      <Box sx={{ mt: 2 }}>
+        <SignInWithGoogle disabled={isLoading} onClick={onSignInClick} />
+      </Box>
     </Box>
   )
 }
