@@ -6,10 +6,18 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material'
-import { useGoogleAPIProvider } from './googleAPIProvider'
-import { useLoadingProvider } from './loadingProvider'
+import { useGoogleAPIProvider } from '../providers/googleAPIProvider'
+import { useLoadingProvider } from '../providers/loadingProvider'
 
-export const Header: React.FC = () => {
+type HeaderProps = {
+  openSettings: boolean
+  setOpenSettings: React.Dispatch<React.SetStateAction<boolean>>
+}
+
+export const Header: React.FC<HeaderProps> = ({
+  openSettings,
+  setOpenSettings,
+}) => {
   const { isSignedIn, signOut } = useGoogleAPIProvider()
   const [isLoading, setIsLoading] = useLoadingProvider()
 
@@ -19,6 +27,8 @@ export const Header: React.FC = () => {
     setIsLoading(false)
   }, [])
 
+  const onSettingsClick = useCallback(() => setOpenSettings((p) => !p), [])
+
   return (
     <AppBar
       position="relative"
@@ -27,9 +37,9 @@ export const Header: React.FC = () => {
       <Toolbar
         sx={{
           flexWrap: 'wrap',
+          maxWidth: 'md',
           ml: 'auto',
           mr: 'auto',
-          maxWidth: 'md',
           width: '100%',
         }}
       >
@@ -37,9 +47,22 @@ export const Header: React.FC = () => {
           PetaPeta
         </Typography>
         {isSignedIn ? (
-          <Button variant="outlined" color="error" onClick={onSignOutClick}>
-            Sign Out
-          </Button>
+          <>
+            <Button
+              onClick={onSettingsClick}
+              variant={openSettings ? 'contained' : 'outlined'}
+            >
+              Settings
+            </Button>
+            <Button
+              color="error"
+              onClick={onSignOutClick}
+              sx={{ ml: 1 }}
+              variant="outlined"
+            >
+              Sign Out
+            </Button>
+          </>
         ) : (
           <></>
         )}

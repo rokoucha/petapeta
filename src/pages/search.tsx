@@ -1,11 +1,12 @@
 import React, { useCallback, useState } from 'react'
 import { Box, Button, InputAdornment, TextField } from '@mui/material'
 import { Search as SearchIcon } from '@mui/icons-material'
-import { useLoadingProvider } from '../components/loadingProvider'
+import { useLoadingProvider } from '../providers/loadingProvider'
 import type { Image } from '../types'
 import { ImageViewer } from '../components/imageViewer'
 import { Gallery } from '../components/gallery'
 import { queryToText } from '../utils'
+import { useSettingsProvider } from '../providers/settingsProvider'
 
 export const Search: React.FC = () => {
   const [image, setImage] = useState<Image | null>(null)
@@ -14,6 +15,7 @@ export const Search: React.FC = () => {
   const [searchText, setSearchText] = useState('')
   const [viewerLoading, setViewerLoading] = useState(false)
   const [viewerOpen, setViewerOpen] = useState(false)
+  const [settings] = useSettingsProvider()
 
   const onSearchTextChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,8 +42,15 @@ export const Search: React.FC = () => {
 
     const query = [
       "mimeType contains 'image/'",
-      'trashed = false',
-      ["fullText contains '${searchText}'", "name contains '${searchText}'"],
+      settings.trashed ? '' : 'trashed = false',
+      settings.searchByFullText
+        ? queryToText([
+            `fullText contains '${searchText}'`,
+            settings.searchByName ? '' : `not name contains '${searchText}'`,
+          ])
+        : settings.searchByName
+        ? `name contains '${searchText}'`
+        : '',
       [
         "'1cAm3mhIxRaAGAI6-4_Irw4wA5GlTR9kT' in parents",
         "'1yTUz48VtVq1TWNtVWXZECaqdSkYi5r5m' in parents",

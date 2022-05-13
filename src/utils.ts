@@ -7,7 +7,15 @@
  * @returns クエリ文字列
  */
 export function queryToText(query: (string | string[])[]): string {
-  return query
-    .map((q) => (Array.isArray(q) ? `( ${q.join(' or ')} )` : q))
-    .join(' and ')
+  return (
+    query
+      // 2階層目から空の要素を削除
+      .map((q) => (Array.isArray(q) ? q.filter((o) => o !== '') : q))
+      // 1階層目から空の要素を削除
+      .filter((q) => (Array.isArray(q) ? true : q !== ''))
+      // 2階層目を or で結合
+      .map((q) => (Array.isArray(q) ? `( ${q.join(' or ')} )` : q))
+      // 1階層目と結合済みの2階層目を and で結合
+      .join(' and ')
+  )
 }

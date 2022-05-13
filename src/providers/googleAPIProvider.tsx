@@ -1,6 +1,5 @@
 import React, { createContext, useCallback, useContext, useState } from 'react'
 import { CLIENT_ID, DISCOVERY_DOCS, SCOPES } from '../constants'
-import { useEffectOnce } from '../hooks/useEffectOnce'
 import { useGoogleAPI } from '../hooks/useGoogleAPI'
 
 const isSignedInContext = createContext<boolean>(false)

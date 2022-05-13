@@ -1,8 +1,8 @@
 import React, { useCallback } from 'react'
 import { Box, Typography } from '@mui/material'
 import { SignInWithGoogle } from '../components/signInWithGoogle'
-import { useGoogleAPIProvider } from '../components/googleAPIProvider'
-import { useLoadingProvider } from '../components/loadingProvider'
+import { useGoogleAPIProvider } from '../providers/googleAPIProvider'
+import { useLoadingProvider } from '../providers/loadingProvider'
 
 export const Landing: React.FC = () => {
   const { signIn } = useGoogleAPIProvider()
