@@ -1,30 +1,10 @@
 import React, { useCallback, useState } from 'react'
-import {
-  Box,
-  Button,
-  IconButton,
-  ImageList,
-  ImageListItem,
-  ImageListItemBar,
-  InputAdornment,
-  LinearProgress,
-  Modal,
-  TextField,
-  Typography,
-} from '@mui/material'
-import { Download, Search as SearchIcon } from '@mui/icons-material'
+import { Box, Button, InputAdornment, TextField } from '@mui/material'
+import { Search as SearchIcon } from '@mui/icons-material'
 import { useLoadingProvider } from '../components/loadingProvider'
-
-type Image = {
-  downloadUrl: string
-  id: string
-  imageHeight: number
-  imageUrl: string | null
-  imageWidth: number
-  mimeType: string
-  name: string
-  thumbnailUrl: string
-}
+import type { Image } from '../types'
+import { ImageViewer } from '../components/imageViewer'
+import { Gallery } from '../components/gallery'
 
 export const Search: React.FC = () => {
   const [image, setImage] = useState<Image | null>(null)
@@ -154,76 +134,17 @@ export const Search: React.FC = () => {
       >
         Seach
       </Button>
-      <ImageList cols={3} gap={8} sx={{ width: '100%' }}>
-        {[...images.values()].map((i) => (
-          <ImageListItem
-            key={i.id}
-            sx={{
-              '&:hover div': { visibility: 'visible' },
-            }}
-          >
-            <img
-              alt={i.name}
-              loading="lazy"
-              onClick={() => onImageClick(i)}
-              src={i.thumbnailUrl}
-              style={{ cursor: 'pointer' }}
-            />
-            <ImageListItemBar
-              actionIcon={
-                <IconButton
-                  aria-label="Download"
-                  href={i.downloadUrl}
-                  rel="noreferrer noopener"
-                  target="_blank"
-                >
-                  <Download />
-                </IconButton>
-              }
-              subtitle={i.id}
-              sx={{ visibility: 'hidden' }}
-              title={i.name}
-            />
-          </ImageListItem>
-        ))}
-      </ImageList>
-      <Modal open={viewerOpen} onClose={onViewerClose}>
-        <Box
-          sx={{
-            alignItems: 'center',
-            bgcolor: 'background.paper',
-            display: 'flex',
-            flexDirection: 'column',
-            left: '50%',
-            p: 0.5,
-            position: 'absolute',
-            top: '50%',
-            transform: 'translate(-50%, -50%)',
-          }}
-        >
-          {image ? (
-            <>
-              {viewerLoading ? (
-                <LinearProgress
-                  sx={{ mt: 'auto', mb: 'auto', width: '100%' }}
-                />
-              ) : image.imageUrl !== null ? (
-                <img
-                  height={image.imageHeight}
-                  src={image.imageUrl}
-                  style={{ height: 'auto', width: '100%' }}
-                  width={image.imageWidth}
-                />
-              ) : (
-                <Typography>Failed to load image</Typography>
-              )}
-              <Typography m={1}>{image.name}</Typography>
-            </>
-          ) : (
-            <></>
-          )}
-        </Box>
-      </Modal>
+      <Gallery images={[...images.values()]} onImageClick={onImageClick} />
+      {image ? (
+        <ImageViewer
+          image={image}
+          loading={viewerLoading}
+          open={viewerOpen}
+          onClose={onViewerClose}
+        />
+      ) : (
+        <></>
+      )}
     </Box>
   )
 }
