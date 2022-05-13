@@ -5,6 +5,7 @@ import { useLoadingProvider } from '../components/loadingProvider'
 import type { Image } from '../types'
 import { ImageViewer } from '../components/imageViewer'
 import { Gallery } from '../components/gallery'
+import { queryToText } from '../utils'
 
 export const Search: React.FC = () => {
   const [image, setImage] = useState<Image | null>(null)
@@ -37,11 +38,21 @@ export const Search: React.FC = () => {
 
     setImages(new Map())
 
+    const query = [
+      "mimeType contains 'image/'",
+      'trashed = false',
+      ["fullText contains '${searchText}'", "name contains '${searchText}'"],
+      [
+        "'1cAm3mhIxRaAGAI6-4_Irw4wA5GlTR9kT' in parents",
+        "'1yTUz48VtVq1TWNtVWXZECaqdSkYi5r5m' in parents",
+      ],
+    ]
+
     let res: gapi.client.Response<gapi.client.drive.FileList> | undefined =
       undefined
     try {
       res = await gapi.client.drive.files.list({
-        q: `mimeType contains 'image/' and trashed = false and ( fullText contains '${searchText}' or name contains '${searchText}' ) and ( '1cAm3mhIxRaAGAI6-4_Irw4wA5GlTR9kT' in parents or '1yTUz48VtVq1TWNtVWXZECaqdSkYi5r5m' in parents )`,
+        q: queryToText(query),
         fields:
           'files(id,kind,mimeType,name,thumbnailLink,webContentLink,parents,imageMediaMetadata)',
       })
