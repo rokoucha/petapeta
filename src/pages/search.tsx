@@ -51,10 +51,7 @@ export const Search: React.FC = () => {
         : settings.searchByName
         ? `name contains '${searchText}'`
         : '',
-      [
-        "'1cAm3mhIxRaAGAI6-4_Irw4wA5GlTR9kT' in parents",
-        "'1yTUz48VtVq1TWNtVWXZECaqdSkYi5r5m' in parents",
-      ],
+      settings.parents.map((p) => `'${p}' in parents`),
     ]
 
     let res: gapi.client.Response<gapi.client.drive.FileList> | undefined =

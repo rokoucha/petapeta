@@ -2,18 +2,20 @@ import React, { createContext, useContext, useEffect, useState } from 'react'
 import { useEffectOnce } from '../hooks/useEffectOnce'
 
 export type SettingsState = {
-  trashed: boolean
-  searchByName: boolean
+  parents: string[]
   searchByFullText: boolean
+  searchByName: boolean
+  trashed: boolean
 }
 
-const DefaultSettingsState: SettingsState = {
-  trashed: false,
-  searchByName: true,
+const defaultSettingsState: SettingsState = {
+  parents: [],
   searchByFullText: true,
+  searchByName: true,
+  trashed: false,
 }
 
-const settingsContext = createContext(DefaultSettingsState)
+const settingsContext = createContext(defaultSettingsState)
 const setSetingsContext = createContext<
   React.Dispatch<React.SetStateAction<SettingsState>>
 >(() => {})
@@ -28,13 +30,9 @@ export function useSettingsProvider() {
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [settings, setSettings] = useState<SettingsState>(DefaultSettingsState)
-
-  useEffectOnce(() => {
+  const [settings, setSettings] = useState<SettingsState>(() => {
     const settingsJson = localStorage.getItem('settings')
-    if (!settingsJson) return
-
-    setSettings(JSON.parse(settingsJson))
+    return settingsJson ? JSON.parse(settingsJson) : defaultSettingsState
   })
 
   useEffect(
