@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { useEffectOnce } from '../hooks/useEffectOnce'
 
 export type SettingsState = {
+  clientId: string
   parents: string[]
   searchByFullText: boolean
   searchByName: boolean
@@ -9,6 +9,7 @@ export type SettingsState = {
 }
 
 const defaultSettingsState: SettingsState = {
+  clientId: '',
   parents: [],
   searchByFullText: true,
   searchByName: true,
@@ -32,7 +33,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [settings, setSettings] = useState<SettingsState>(() => {
     const settingsJson = localStorage.getItem('settings')
-    return settingsJson ? JSON.parse(settingsJson) : defaultSettingsState
+    return settingsJson
+      ? { ...defaultSettingsState, ...JSON.parse(settingsJson) }
+      : defaultSettingsState
   })
 
   useEffect(

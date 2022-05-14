@@ -47,10 +47,14 @@ export function useGoogleAPI({
     await Promise.all(discoveryDocs.map((d) => gapi.client.load(d)))
   }
 
+  const setClientId = (cid: string) => {
+    clientId = cid
+  }
+
   const setToken = async (accessToken: string): Promise<boolean> => {
     if (!isReady) await setup()
 
-    let res: gapi.client.Response<any> | undefined = undefined
+    let res: gapi.client.Response<any>
     try {
       res = await gapi.client.request({
         path: `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${accessToken}`,
@@ -106,5 +110,11 @@ export function useGoogleAPI({
     }
   }
 
-  return { setup, setToken, getToken, revokeToken } as const
+  return {
+    getToken,
+    revokeToken,
+    setClientId,
+    setToken,
+    setup,
+  } as const
 }

@@ -2,6 +2,7 @@ import { CreateNewFolder, Delete, Folder } from '@mui/icons-material'
 import {
   Avatar,
   Box,
+  Button,
   FormControlLabel,
   FormGroup,
   IconButton,
@@ -13,8 +14,8 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import React, { useCallback, useState } from 'react'
-import { useEffectOnce } from '../hooks/useEffectOnce'
+import React, { useCallback, useEffect, useState } from 'react'
+import { useGoogleAPIProvider } from '../providers/googleAPIProvider'
 import { useLoadingProvider } from '../providers/loadingProvider'
 import { useSettingsProvider } from '../providers/settingsProvider'
 
@@ -23,9 +24,12 @@ export const Settings: React.FC = () => {
   const [settings, setSettings] = useSettingsProvider()
   const [parents, setParents] = useState<gapi.client.drive.File[]>([])
   const [newParent, setNewParent] = useState('')
+  const { signOut, isSignedIn } = useGoogleAPIProvider()
 
-  useEffectOnce(() => {
+  useEffect(() => {
     ;(async () => {
+      if (!isSignedIn) return
+
       setIsLoading(true)
 
       let res: gapi.client.Response<gapi.client.drive.File>[]
@@ -38,6 +42,8 @@ export const Settings: React.FC = () => {
       } catch (e) {
         console.error(e)
 
+        setIsLoading(false)
+
         return
       }
 
@@ -45,7 +51,22 @@ export const Settings: React.FC = () => {
 
       setIsLoading(false)
     })()
-  })
+  }, [isSignedIn])
+
+  const onSignOutClick = useCallback(async () => {
+    setIsLoading(true)
+    await signOut()
+    setIsLoading(false)
+  }, [])
+
+  const onClientIdChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setIsLoading(true)
+      setSettings((p) => ({ ...p, clientId: e.target.value }))
+      setIsLoading(false)
+    },
+    [],
+  )
 
   const onTrashedChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -139,6 +160,28 @@ export const Settings: React.FC = () => {
         Settings
       </Typography>
       <Typography component="h2" variant="h6" sx={{ mt: 1 }}>
+        Authentication
+      </Typography>
+      <TextField
+        disabled={isLoading}
+        onChange={onClientIdChange}
+        size="small"
+        sx={{ width: '40%', mt: 1 }}
+        value={settings.clientId}
+        variant="outlined"
+      />
+      <Box>
+        <Button
+          color="error"
+          disabled={isLoading || !isSignedIn}
+          onClick={onSignOutClick}
+          sx={{ mt: 1 }}
+          variant="outlined"
+        >
+          Sign Out
+        </Button>
+      </Box>
+      <Typography component="h2" variant="h6" sx={{ mt: 1 }}>
         Search options
       </Typography>
       <FormGroup>
@@ -146,7 +189,7 @@ export const Settings: React.FC = () => {
           control={
             <Switch
               checked={settings.trashed}
-              disabled={isLoading}
+              disabled={isLoading || !isSignedIn}
               onChange={onTrashedChange}
             />
           }
@@ -156,7 +199,7 @@ export const Settings: React.FC = () => {
           control={
             <Switch
               checked={settings.searchByName}
-              disabled={isLoading}
+              disabled={isLoading || !isSignedIn}
               onChange={onSearchByNameChange}
             />
           }
@@ -166,7 +209,7 @@ export const Settings: React.FC = () => {
           control={
             <Switch
               checked={settings.searchByFullText}
-              disabled={isLoading}
+              disabled={isLoading || !isSignedIn}
               onChange={onSearchByFullTextChange}
             />
           }
@@ -184,7 +227,7 @@ export const Settings: React.FC = () => {
               secondaryAction={
                 <IconButton
                   aria-label="delete"
-                  disabled={isLoading}
+                  disabled={isLoading || !isSignedIn}
                   edge="end"
                   onClick={() => onRemoveParentClick(p.id ?? '')}
                 >
@@ -221,7 +264,7 @@ export const Settings: React.FC = () => {
       <Typography sx={{ mt: 1 }}>Add folder</Typography>
       <Box sx={{ mt: 1, alignItems: 'center', display: 'flex' }}>
         <TextField
-          disabled={isLoading}
+          disabled={isLoading || !isSignedIn}
           onChange={onNewParentChange}
           onKeyDown={onNewParentKeyDown}
           size="small"
@@ -230,7 +273,7 @@ export const Settings: React.FC = () => {
         />
         <IconButton
           aria-label="add"
-          disabled={isLoading}
+          disabled={isLoading || !isSignedIn}
           onClick={onNewParentClick}
           size="large"
           sx={{ ml: 1, mt: 'auto', mb: 'auto' }}

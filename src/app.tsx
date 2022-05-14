@@ -9,7 +9,10 @@ import {
   LoadingProvider,
   useLoadingProvider,
 } from './providers/loadingProvider'
-import { SettingsProvider } from './providers/settingsProvider'
+import {
+  SettingsProvider,
+  useSettingsProvider,
+} from './providers/settingsProvider'
 import { useEffectOnce } from './hooks/useEffectOnce'
 
 import { Footer } from './components/footer'
@@ -17,7 +20,7 @@ import { Header } from './components/header'
 
 import { Landing } from './pages/landing'
 import { Search } from './pages/search'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Settings } from './pages/settings'
 
 const theme = createTheme({
@@ -34,19 +37,24 @@ const theme = createTheme({
 
 const Contents: React.FC = () => {
   const [_, setIsLoading] = useLoadingProvider()
+  const [settings] = useSettingsProvider()
+  const { isSignedIn, setUp, setClientId } = useGoogleAPIProvider()
   const [openSettings, setOpenSettings] = useState(false)
-  const { isSignedIn, setUp } = useGoogleAPIProvider()
 
   useEffectOnce(() => {
     setIsLoading(true)
     setUp().then(() => setIsLoading(false))
   })
 
+  useEffect(() => {
+    setClientId(settings.clientId)
+  }, [settings.clientId])
+
   return (
     <>
       <Header openSettings={openSettings} setOpenSettings={setOpenSettings} />
       <Container component="main" maxWidth="md">
-        {!isSignedIn ? <Landing /> : openSettings ? <Settings /> : <Search />}
+        {openSettings ? <Settings /> : isSignedIn ? <Search /> : <Landing />}
       </Container>
       <Footer />
     </>

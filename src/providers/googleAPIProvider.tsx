@@ -1,19 +1,23 @@
 import React, { createContext, useCallback, useContext, useState } from 'react'
-import { CLIENT_ID, DISCOVERY_DOCS, SCOPES } from '../constants'
+import { DISCOVERY_DOCS, SCOPES } from '../constants'
 import { useGoogleAPI } from '../hooks/useGoogleAPI'
 
 const isSignedInContext = createContext<boolean>(false)
+const setClientIdContext = createContext<(cid: string) => void>(
+  (cid: string) => {},
+)
 const setUpContext = createContext<() => Promise<void>>(async () => {})
 const signInContext = createContext<() => Promise<void>>(async () => {})
 const signOutContext = createContext<() => Promise<void>>(async () => {})
 
 export function useGoogleAPIProvider() {
   const isSignedIn = useContext(isSignedInContext)
+  const setClientId = useContext(setClientIdContext)
   const setUp = useContext(setUpContext)
   const signIn = useContext(signInContext)
   const signOut = useContext(signOutContext)
 
-  return { isSignedIn, setUp, signIn, signOut } as const
+  return { isSignedIn, setClientId, setUp, signIn, signOut } as const
 }
 
 export const GoogleApiProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -21,8 +25,8 @@ export const GoogleApiProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [isSignedIn, setIsSignedIn] = useState(false)
 
-  const { setup, setToken, getToken, revokeToken } = useGoogleAPI({
-    clientId: CLIENT_ID,
+  const { getToken, revokeToken, setClientId, setToken, setup } = useGoogleAPI({
+    clientId: '',
     discoveryDocs: DISCOVERY_DOCS,
     scopes: SCOPES,
   })
@@ -50,13 +54,15 @@ export const GoogleApiProvider: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <isSignedInContext.Provider value={isSignedIn}>
-      <setUpContext.Provider value={setUp}>
-        <signInContext.Provider value={signIn}>
-          <signOutContext.Provider value={signOut}>
-            {children}
-          </signOutContext.Provider>
-        </signInContext.Provider>
-      </setUpContext.Provider>
+      <setClientIdContext.Provider value={setClientId}>
+        <setUpContext.Provider value={setUp}>
+          <signInContext.Provider value={signIn}>
+            <signOutContext.Provider value={signOut}>
+              {children}
+            </signOutContext.Provider>
+          </signInContext.Provider>
+        </setUpContext.Provider>
+      </setClientIdContext.Provider>
     </isSignedInContext.Provider>
   )
 }
