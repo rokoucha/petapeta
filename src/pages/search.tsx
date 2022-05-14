@@ -54,8 +54,7 @@ export const Search: React.FC = () => {
       settings.parents.map((p) => `'${p}' in parents`),
     ]
 
-    let res: gapi.client.Response<gapi.client.drive.FileList> | undefined =
-      undefined
+    let res: gapi.client.Response<gapi.client.drive.FileList>
     try {
       res = await gapi.client.drive.files.list({
         q: queryToText(query),
@@ -71,7 +70,7 @@ export const Search: React.FC = () => {
 
     setImages(
       new Map(
-        (res?.result.files ?? []).map((f) => [
+        (res.result.files ?? []).map((f) => [
           f.id ?? '',
           {
             downloadUrl: f.webContentLink ?? '',
@@ -96,10 +95,18 @@ export const Search: React.FC = () => {
     setViewerOpen(true)
 
     if (i.imageUrl === null) {
-      const res = await gapi.client.drive.files.get({
-        alt: 'media',
-        fileId: i.id,
-      })
+      let res: gapi.client.Response<gapi.client.drive.File>
+      try {
+        res = await gapi.client.drive.files.get({
+          alt: 'media',
+          fileId: i.id,
+        })
+      } catch (e) {
+        console.error(e)
+
+        setViewerLoading(true)
+        return
+      }
 
       const imageBinary = new Uint8Array(
         Array.from(res.body).map((b) => b.charCodeAt(0)),
